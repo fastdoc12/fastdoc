@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/kTcKq4fRkWOsKMeVPdRvpgm5CVaqtBrkMVpP8zz2odU9cz4uVNU6g2dXJg7g3vjTdf1cOXiRlNkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>FastDoc</title>
+</head>
+<body>
+    <div class="container" id="container">
+        <!-- Formulário de Cadastro -->
+        <div class="form-container sign-up">
+            <form id="register-form">
+                <h1>Criar conta</h1>
+                <span>ou use seu e-mail para registro</span>
+                <input type="text" id="name" name="name" placeholder="Nome" required>
+                <input type="email" id="email" name="email" placeholder="Email" required>
+                <input type="password" id="password" name="password" placeholder="Senha" required>
+                <button type="submit">Inscrição</button>
+            </form>
+        </div>
+
+        <!-- Formulário de Login -->
+        <div class="form-container sign-in">
+            <form id="login-form">
+                <h1>Entrar</h1>
+                <span>ou use seu e-mail para entrar</span>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Senha" required>
+                <a href="forgot-password.html">Esqueci minha senha?</a>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-left">
+                    <h1>Bem-vindo de volta!</h1>
+                    <p>Insira seus dados pessoais para usar todos os recursos do site</p>
+                    <button class="hidden" id="login">Entrar</button>
+                </div>
+                <div class="toggle-panel toggle-right">
+                    <h1>FastDoc</h1>
+                    <p>Registre-se com seus dados pessoais para usar todos os recursos do site</p>
+                    <button class="hidden" id="register">Inscrição</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // URL do backend
+        const API_URL = 'http://localhost:3000';
+
+        // Enviar formulário de cadastro
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Previne o comportamento padrão de envio do formulário
+
+            // Coleta os dados do formulário
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Envia os dados para o servidor backend
+            const response = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',  // Informando que os dados são JSON
+                },
+                body: JSON.stringify({ name, email, password })  // Envia os dados do formulário como JSON
+            });
+
+            // Espera a resposta do backend
+            const data = await response.json();
+
+            // Exibe a mensagem de sucesso ou erro
+            if (response.ok) {
+                alert(data.message);  // Se o cadastro for bem-sucedido
+            } else {
+                alert(data.error || 'Erro ao realizar cadastro.');  // Se houver erro
+            }
+        });
+
+        // Enviar formulário de login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Previne o recarregamento da página
+            const formData = new FormData(document.getElementById('login-form'));
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(result.message || 'Login realizado com sucesso!');
+                    // Armazenar o token no localStorage
+                    localStorage.setItem('token', result.token);
+                    // Redirecionar para o dashboard
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(result.error || 'Erro ao fazer login.');
+                }
+            } catch (error) {
+                console.error('Erro ao fazer login:', error);
+                alert('Erro ao fazer login. Tente novamente.');
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

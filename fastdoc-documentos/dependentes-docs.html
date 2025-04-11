@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style_doc.css">
+  <script src="auth.js"></script>
+  <script src="script.js"></script>
+  <title>Documentos Dependentes</title>
+  <style> body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f8ff;
+    padding: 20px;
+  }
+  .container {
+    margin-top: 50px;
+  }
+  #uploadedDocument {
+    margin-top: 20px;
+    max-width: 100%;
+  }
+  .button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .button:hover {
+    background-color: #218838;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Documentos Dependentes</h1>
+    <form id="uploadForm" data-category="documentos-dependentes">
+      <label for="document">Carregar documento dependente:</label><br>
+      <input type="file" id="document" name="file" accept="image/*,application/pdf"><br><br>
+      <button type="submit" class="button">Salvar Documentos</button>
+    </form>
+    <div id="documentPreview">
+      <h3>Documento Carregado:</h3>
+      <div id="uploadedDocument"></div>
+    </div>
+    <br>
+    <a href="#" onclick="history.back()" style="color: #218838; text-decoration: none;">Voltar para a página anterior</a>
+  </div>
+
+  <script>
+    const uploadForm = document.getElementById('uploadForm');
+    const documentInput = document.getElementById('document');
+    const uploadedDocumentDiv = document.getElementById('uploadedDocument');
+
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const file = documentInput.files[0];
+      if (!file) {
+        alert('Por favor, selecione um arquivo!');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('http://localhost:3000/upload-doc/dependent', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(result.message);
+
+          if (file.type.startsWith('image/')) {
+            uploadedDocumentDiv.innerHTML = `<img src="${result.fileUrl}" id="uploadedDocument" alt="Documento">`;
+          } else if (file.type === 'application/pdf') {
+            uploadedDocumentDiv.innerHTML = `<iframe src="${result.fileUrl}" width="100%" height="500px"></iframe>`;
+          }
+        } else {
+          alert(result.error || 'Erro ao fazer upload!');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao conectar ao servidor.');
+      }
+    });
+  </script>
+</body>
+</html>
